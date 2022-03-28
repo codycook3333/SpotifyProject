@@ -3,7 +3,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 
 auth_manager = SpotifyClientCredentials()
 sp = spotipy.Spotify(auth_manager=auth_manager)
-username = '12147687832'
+username = get_username()
 
 
 playlists = sp.user_playlists(username)
@@ -17,3 +17,25 @@ while playlists:
 # export SPOTIPY_CLIENT_ID='7372aad238034bcd80dabd1c3925a2d0'
 # export SPOTIPY_CLIENT_SECRET='e690456872084adc93289a2175acd86c'
 # export SPOTIPY_REDIRECT_URI='http://localhost:1410/'
+
+#def get_username:
+
+
+#def get_artist:
+
+#def get_track:
+
+#def get_album:
+
+#def get_genre:
+
+#def get_playlist:
+
+
+#def pie_chart:
+
+#def bar_graph:
+
+#def scatter_plot:
+
+
