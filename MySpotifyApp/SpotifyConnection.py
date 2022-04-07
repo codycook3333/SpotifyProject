@@ -12,20 +12,10 @@ SPOTIPY_REDIRECT_URI='http://localhost:1410/'
 
 auth_manager = SpotifyClientCredentials(SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET)
 sp = spotipy.Spotify(auth_manager=auth_manager)
-userPlaylists = ''
-playlists = sp.user_playlists(username)
-while playlists:
-    for i, playlist in enumerate(playlists['items']):
-        userPlaylists += "%4d %s\n" % (i + 1 + playlists['offset'], playlist['name'])
-    if playlists['next']:
-        playlists = sp.next(playlists)
-    else:
-        playlists = None
-#print(userPlaylists)
 
-SelectionOptions = ["Artist", "Album", "Track Name", "Genre"]
 
-#def get_username:
+SelectionOptions = ["Artist", "Track Name", "Genre"]
+plotOptions = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'time_signature']
 
 
 def get_artist(artistName):
@@ -33,13 +23,16 @@ def get_artist(artistName):
     items=result['artists']['items']
     if len(items) > 0:
         artist = items[0]
+    if result['artists']['items'] == []:
+        result = "No results found"
+        return result
     newResults = sp.artist(artist['id'])
     # d = {'Artist Name': [newResults['name']], 'Total Followers': [newResults['followers']['total']], 'Genres': [newResults['genres']], 'ID': [newResults['id']], 'Popularity': [newResults['popularity']]}
     # df = pd.DataFrame(data=d)
     filteredResults = []
     filteredResults.append(newResults['name'])
     filteredResults.append(newResults['followers']['total'])
-    filteredResults.append(newResults['genres'])
+    filteredResults.append(newResults['genres'][:3])
     filteredResults.append(newResults['id'])
     filteredResults.append(newResults['popularity'])
     colNames = []
@@ -48,55 +41,122 @@ def get_artist(artistName):
     df.columns = ['']
     return df
 
-    
-
 def recommendation(info, boxPlace):
-    if boxPlace == 0:
-        # we need to find the Genre of the artist
-        result = sp.search(q='artist:' + info, type='artist')
-        items=result['artists']['items']
-        if len(items) > 0:
-            artist = items[0]
-        newResults = sp.artist(artist['id'])
-        artist_id = newResults['id']
-
+    if boxPlace == 0:    
+        artistSearch = sp.search(q='artist:' + info, type='artist', limit=1)
+        artistItems=artistSearch['artists']['items']
+        if len(artistItems) > 0:
+            artist = artistItems[0]
+        if artistSearch['artists']['items'] == []:
+            result = "No results found"
+            return result
+    
     elif boxPlace ==1:
-        #we need to find the Artist of the Album
-        # We first need the album id
-        allinfo = sp.search(q='album:'+ info, type='album')
-        albumID = allinfo['albums']['items'][0]['id']
-        #then we use that to get the artist id 
-        result = sp.album(albumID)
-        artist_id = result['artists'][0]['id']
+        #do some stuff
+        result = sp.search(q='track:' + info, type='track')
+        items=result['tracks']['items']
+        if len(items) > 0:
+            items = items[0]
+        if result['tracks']['items'] == []:
+            result = "No results found"
+            return result
+        artist = sp.artist(items['artists'][0]['id'])
+        if artist == []:
+            result = "No results found"
+            return result
         
+    else: 
+        artist = get_genre(info)[1][0]['artists'][0]
 
-    # elif boxPlace == 2:
-    #     # we need to find the Artist id of the track name
-        
-        
+    artistSeed = []
+    artistSeed.append(artist['id'])
+    
+    if boxPlace ==1 or boxPlace==0:
+        genreSeed = artist['genres'][:2]
+    
+    else: 
+        genreSeed = info
+    
+    trackSeed = []
+    recom = sp.recommendations(seed_artists=artistSeed, seed_genres=genreSeed, seed_tracks=trackSeed)
+    i = 0 
+    artistRecomList = []
+    popRecomList = []
+    while i < 20:
+        #get list of recommended artists based off of artist, genre, or track
+        artistRecomList.append(recom['tracks'][i]['artists'][0]['name'])
+        #get list of thier popularity
+        popRecomList.append(recom['tracks'][i]['popularity'])
+        i+=1
+    recomDict = {'Artist Name': artistRecomList, 'Popularity': popRecomList}
+    recomDF = pd.DataFrame(data=recomDict)
+    return recomDF, artistRecomList
 
-    # # #else:
-    # #     # we are already given the Genre so begin the search.
-    # return sp.artist_related_artists(artist_id)
-    # get_genre()
-
- 
-# result = sp.search(q='track:'+ 'Given Up', type='track')
 
 
-# print(result)
-# Temp artist id 4uG8q3GPuWHQlRbswMIRS6
-
-#def get_track:
-
-#def get_album:
-
-#def get_genre:
-
-#def get_playlist:
 
 
-#def pie_chart:
+
+def get_track(trackName):
+    result = sp.search(q='track:' + trackName, type='track')
+    items=result['tracks']['items']
+    if len(items) > 0:
+        items = items[0]
+    if result['tracks']['items'] == []:
+        result = "No results found"
+        return result
+    genreSearch = sp.artist(items['artists'][0]['id'])
+    genre = genreSearch['genres']
+    filteredResults = []
+    filteredResults.append(items['name'])
+    filteredResults.append(items['artists'][0]['name'])
+    filteredResults.append(items['popularity'])
+    filteredResults.append(genre[0:3])
+    colNames = []
+    colNames = ['Track Name', 'Artist Name: ', 'Popularity: ', 'Genres: ']
+    df = pd.DataFrame(data=filteredResults, index=colNames)
+    df.columns = ['']
+    return df
+
+def get_genre(genre):
+    result = sp.search(q='genre:' + genre)
+    items=result['tracks']['items']
+    tracks = ""
+    i = 0
+    if result['tracks']['items'] == []:
+        result = "No results found"
+        return result
+    else:
+        while i < 10:
+            tracks += (items[i]['name'] + ' - ' + items[i]['artists'][0]['name'] + '\n')
+            i+=1
+        return tracks, items
+
+def get_audio_features(track_id):
+    result = sp.audio_features(track_id)
+    resultList = []
+    resultList.append(result[0]['danceability'])
+    resultList.append(result[0]['energy'])
+    resultList.append(result[0]['loudness'])
+    resultList.append(result[0]['speechiness'])
+    resultList.append(result[0]['acousticness'])
+    resultList.append(result[0]['instrumentalness'])
+    resultList.append(result[0]['liveness'])
+    resultList.append(result[0]['valence'])
+    resultList.append(result[0]['tempo'])
+    resultList.append(result[0]['time_signature'])
+    colNames = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'time_signature']
+    df = pd.DataFrame(data=resultList, index=colNames)
+    df.columns=['']
+    return df
+
+
+# artistSeed = []
+# artistSeed.append('7oPftvlwr6VrsViSDV7fJY')
+# genreSeed = 'punk'
+# trackSeed = []
+# recom = sp.recommendations(seed_artists=artistSeed, seed_genres=genreSeed, seed_tracks=trackSeed)
+# print(recom)
 
 #def bar_graph:
 
