@@ -5,20 +5,28 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from pandastable import *
 import pandas as pd
 import matplotlib as plt
-username = 12147687832
-## test username is 12147687832
+
+
+# ID's required to preform searches
 
 SPOTIPY_CLIENT_ID='7372aad238034bcd80dabd1c3925a2d0'
 SPOTIPY_CLIENT_SECRET='e690456872084adc93289a2175acd86c'
 SPOTIPY_REDIRECT_URI='http://localhost:1410/'
 
+
+# Authentication for the searches
+
 auth_manager = SpotifyClientCredentials(SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET)
 sp = spotipy.Spotify(auth_manager=auth_manager)
 
 
+# List of strings for dropdown menu options
+
 SelectionOptions = ["Artist", "Track Name", "Genre"]
 plotOptions = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'time_signature']
 
+
+# Get artist function for the artist search
 
 def get_artist(artistName):
     result = sp.search(q='artist:' + artistName, type='artist')
@@ -29,8 +37,6 @@ def get_artist(artistName):
         result = "No results found"
         return result
     newResults = sp.artist(artist['id'])
-    # d = {'Artist Name': [newResults['name']], 'Total Followers': [newResults['followers']['total']], 'Genres': [newResults['genres']], 'ID': [newResults['id']], 'Popularity': [newResults['popularity']]}
-    # df = pd.DataFrame(data=d)
     filteredResults = []
     filteredResults.append(newResults['name'])
     filteredResults.append(newResults['followers']['total'])
@@ -42,6 +48,9 @@ def get_artist(artistName):
     df = pd.DataFrame(data=filteredResults, index=colNames)
     df.columns = ['']
     return df
+
+
+# Recommendation function
 
 def recommendation(info, boxPlace):
     if boxPlace == 0:    
@@ -97,9 +106,7 @@ def recommendation(info, boxPlace):
     return recomDF, artistIDList
 
 
-
-
-
+# Get track information function
 
 def get_track(trackName):
     result = sp.search(q='track:' + trackName, type='track')
@@ -122,6 +129,9 @@ def get_track(trackName):
     df.columns = ['']
     return df
 
+
+# Get Genre results function
+
 def get_genre(genre):
     result = sp.search(q='genre:' + genre)
     items=result['tracks']['items']
@@ -135,6 +145,9 @@ def get_genre(genre):
             tracks += (items[i]['name'] + ' - ' + items[i]['artists'][0]['name'] + '\n')
             i+=1
         return tracks, items
+
+
+# Get audio features function for the plots
 
 def get_audio_features(track_id):
     result = sp.audio_features(track_id)
@@ -155,6 +168,8 @@ def get_audio_features(track_id):
     dfT = df.transpose()
     return df, resultList, dfT
 
+
+# This sorts the data into a data frame so that we can Plot it
 
 def get_plot_data(artistIDList):
     trackList = []
@@ -179,48 +194,6 @@ def get_plot_data(artistIDList):
         i += 1
 
     bigDF = pd.concat(frames)
-    # print(bigDF)
+
     return bigDF
-    
-
-# newResults = sp.album_tracks('6BkzuBcjPyjUiLe2OzVHks')
-# print(newResults['items'][0]['id'])
-
-# temp track id is 4XpeLct2suqK9hbsIDJQZz
-
-# frames = []
-# results = get_audio_features('4XpeLct2suqK9hbsIDJQZz')[2]
-# result2 = get_audio_features('4XpeLct2suqK9hbsIDJQZz')[2]
-# frames.append(results)
-# frames.append(result2)
-# results3 = pd.concat(frames)
-# print(results3)
-# trackList = []
-# artistsAlbums = sp.artist_albums('4NGshr0X0WNGCy4emP2O0Z')
-# albumID = artistsAlbums['items'][0]['id']
-# album1 = sp.album_tracks(albumID)
-# album1 = album1['items']
-# j = 0
-# for i in album1:
-#     trackList.append(album1[j]['id'])
-#     j +=1
-# df1 = pd.DataFrame()
-# infoList = []
-# i = 0
-# for k in trackList:
-    
-#     if df1.empty == True:
-#         df1 = get_audio_features(trackList[i])[0]
-#     else:
-#         infoList  = get_audio_features(trackList[i])[1]
-#         df1.insert(loc = i, column=i, value=infoList)
-#     i += 1
-# df1T = df1.transpose()
-# df1T2 = df1T
-# frames = [df1T, df1T2]
-# newDF = pd.concat(frames)
-# print(newDF)
-
-
-
-# Temp album id is 6BkzuBcjPyjUiLe2OzVHks
+   
