@@ -23,7 +23,7 @@ sp = spotipy.Spotify(auth_manager=auth_manager)
 # List of strings for dropdown menu options
 
 SelectionOptions = ["Artist", "Track Name", "Genre"]
-plotOptions = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'time_signature']
+plotOptions = ['Danceability', 'Energy', 'Loudness', 'Speechiness', 'Acousticness', 'Instrumentalness', 'Liveness', 'Valence', 'Tempo', 'Time Signature']
 
 
 # Get artist function for the artist search

@@ -22,8 +22,21 @@ df = pd.DataFrame
 # Search canvas function and its locations
 
 def searchCommand():
+
+    # Creates the search and Recommendations boxes
+
     ttk.Label(resultLabel, text="Search Results", font=('Times', 30)).place(relx=0.5, rely=0.5, anchor=CENTER)
     ttk.Label(recomLabel, text="Recommendations", font=('Times', 30)).place(relx=0.5, rely=0.5, anchor=CENTER)
+    
+    # Buttons and label for plots
+
+    ttk.Label(plotLabel, text="Plots", font=('Times', 30)).place(relx=0.5, rely=0.5, anchor=CENTER)
+    ttk.Button(can3, text=" Plot ", command=plotFunction).place(relx=0.5, rely=0.6, anchor=CENTER)
+    ttk.Label(can3, text="Value to Plot ").place(relx=0.33, rely=0.2, anchor=CENTER)
+
+    plotSelectionBox1 = ttk.Combobox(can3, textvariable=selection2, values=SC.plotOptions)
+    plotSelectionBox1.place(relx=0.66, rely=0.2, anchor=CENTER)
+    plotSelectionBox1.current(0) 
     searchResults = tk.Text(can)
     searchResults.config(height=7, width=62)
     searchResults.place(relx=.5, rely=0.5, anchor=CENTER)
@@ -89,7 +102,7 @@ def plotFunction():
     elif columnPos == 9:
         ax1.set_ylim([0,10])
     canvas.draw()
-    canvas.get_tk_widget().pack(side= 'bottom', anchor=SE, padx=125, pady=25)
+    canvas.get_tk_widget().pack(side= 'bottom', anchor=SE, padx=25, pady=25)
 
 
 # App creation is under this. Anything within this area is in the app window
@@ -127,7 +140,10 @@ recomLabel.place(relx = 0, rely=0.69, anchor=W)
 can2 = Canvas(root, height=200, width=500)
 can2.place(relx=0, rely=0.85, anchor=W)
 
-can3 = Canvas(root, height=250, width=600)
+plotLabel = Canvas(root, height = 50 , width=500)
+plotLabel.place(relx = 1, rely=0.05, anchor=E)
+
+can3 = Canvas(root, height=100, width=600)
 can3.place(relx=1, rely=.2, anchor=E)
 
 fig = Figure(figsize = (5, 5), dpi =100)
@@ -136,7 +152,7 @@ canvas = FigureCanvasTkAgg(fig, master=root)
 
 # Title of app 
 
-ttk.Label(titleLabel, text="Song Data Visualization", font=('Times', 30)).place(relx=0.5, rely=0.5, anchor=CENTER)
+ttk.Label(titleLabel, text="Song Data Visualization", font=('Arial', 30)).place(relx=0.5, rely=0.5, anchor=CENTER)
 
 
 # Dropdown menu to specify what to search for
@@ -153,20 +169,6 @@ ttk.Label(frm, text="Name of what you are searching for:").place(relx=0.2, rely=
 searchEntry = ttk.Entry(frm, textvariable=searchText).place(relx=0.8, rely=0.6, anchor=CENTER) 
 ttk.Button(frm, text=" Search ", command=searchCommand).place(relx=0.5, rely=0.8, anchor=CENTER) 
 
-
-# Buttons for plots
-
-ttk.Button(can3, text=" Plot ", command=plotFunction).place(relx=0.4, rely=0.3, anchor=CENTER) 
-# ttk.Button(can3, text=" Histogram ", command=searchCommand).place(relx=0.5, rely=0.1, anchor=CENTER)
-# ttk.Button(can3, text=" Box Plot ", command=searchCommand).place(relx=0.9, rely=0.1, anchor=CENTER)
-
-
-# Menu to choose what to plot
-
-ttk.Label(can3, text="Value to Plot ").place(relx=0.1, rely=0.1, anchor=CENTER)
-plotSelectionBox1 = ttk.Combobox(can3, textvariable=selection2, values=SC.plotOptions)
-plotSelectionBox1.place(relx=0.6, rely=0.1, anchor=CENTER)
-plotSelectionBox1.current(0)
 
 #----------------------------------------------------------------------------------------------------------------------
 root.mainloop()
